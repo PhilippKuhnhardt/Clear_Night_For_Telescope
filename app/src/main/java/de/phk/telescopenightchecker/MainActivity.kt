@@ -125,9 +125,10 @@ class MainActivity : AppCompatActivity() {
      */
     fun getRelevantHours() : IntArray{
         //TODO: Make this dynamic
+        //TODO: Consider that the start time might be on the next day
         val startHour = 21
         val startMinute = 0
-        val endHour = 2
+        val endHour = 3
         val endMinute = 0
 
         val current = LocalDateTime.now()
@@ -142,6 +143,9 @@ class MainActivity : AppCompatActivity() {
 
         val array = IntArray(2)
         array[0] = current.until(startDate, ChronoUnit.HOURS).toInt()
+        if(array[0] < 0 ){
+            array[0] = 0
+        }
         array[1] = current.until(endDate, ChronoUnit.HOURS).toInt()
 
         return array
