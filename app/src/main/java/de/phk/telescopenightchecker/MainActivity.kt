@@ -1,9 +1,13 @@
 package de.phk.telescopenightchecker
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import android.icu.util.GregorianCalendar
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -11,6 +15,9 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
@@ -30,6 +37,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         downloadWeather()
         getRelevantHours()
+
+
+        createNotificationChannel()
+        val notificationWorker: OneTimeWorkRequest = OneTimeWorkRequestBuilder<NotificationWorker>().build()
+        WorkManager
+            .getInstance(this)
+            .enqueue(notificationWorker)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -37,6 +51,25 @@ class MainActivity : AppCompatActivity() {
         inflater.inflate(R.menu.settings, menu)
         return true
     }
+
+    private fun createNotificationChannel() {
+        val CHANNEL_ID = "default"
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = getString(R.string.channel_name)
+            val descriptionText = getString(R.string.channel_description)
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+            // Register the channel with the system
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle item selection
@@ -67,7 +100,7 @@ class MainActivity : AppCompatActivity() {
 
         val jsonObjectRequest = JsonObjectRequest(
             Request.Method.GET, url, null,
-            Response.Listener { response ->
+            { response ->
                 Log.d("Result", response.toString())
                 if(analyzeWeatherData(response)){
                     //Weather is fine
@@ -80,7 +113,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
             },
-            Response.ErrorListener { error ->
+            { error ->
                 // TODO: Handle error
                 Log.d("Result", error.toString())
                 Toast.makeText(this, R.string.connection_error, Toast.LENGTH_LONG).show()
