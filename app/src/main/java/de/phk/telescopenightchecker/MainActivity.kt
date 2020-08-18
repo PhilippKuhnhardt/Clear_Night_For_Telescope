@@ -35,8 +35,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        downloadWeather()
-        getRelevantHours()
+        updateWeather()
 
 
         createNotificationChannel()
@@ -44,6 +43,10 @@ class MainActivity : AppCompatActivity() {
         WorkManager
             .getInstance(this)
             .enqueue(notificationWorker)
+    }
+
+    private fun updateWeather(){
+        downloadWeather()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -85,7 +88,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * Downloads the weatherdata from openweathermap
      */
-    fun downloadWeather(){
+    private fun downloadWeather(){
 
         //TODO: Make this dynamic
         val lat = 49.853691
@@ -104,11 +107,11 @@ class MainActivity : AppCompatActivity() {
                 Log.d("Result", response.toString())
                 if(analyzeWeatherData(response)){
                     //Weather is fine
-                    statusText.text = "Weather is good tonight"
+                    statusText.text = getString(R.string.good_weather_msg)
                     backgroundImage.setImageResource(R.drawable.space)
                 }else{
                     //Weather isn't fine
-                    statusText.text = "Weather is bad tonight"
+                    statusText.text = getString(R.string.bad_weather_msg)
                     backgroundImage.setImageResource(R.drawable.clouds)
                 }
 
@@ -127,7 +130,7 @@ class MainActivity : AppCompatActivity() {
      * @param weatherData Should contain the entirety of the downloaded weather Data
      * @return true = Weather is fine for tonight, false = Weather isn't good
      */
-    fun analyzeWeatherData(weatherData : JSONObject) : Boolean{
+    private fun analyzeWeatherData(weatherData : JSONObject) : Boolean{
         val weatherArray : JSONArray = weatherData.get("hourly") as JSONArray
         val relevantHours : IntArray = getRelevantHours()
 
@@ -145,7 +148,7 @@ class MainActivity : AppCompatActivity() {
      * @param hourData Should contain the data of an entire hour, meaning an array of the hourly JSONArray
      * @return returns if the cloudValue is smaller than 10 for this hour
      */
-    fun minimalCloudsForHour(hourData : JSONObject) : Boolean{
+    private fun minimalCloudsForHour(hourData : JSONObject) : Boolean{
         val maxCloudValue = 10
         if (hourData.getInt("clouds") <= maxCloudValue){
             return true
@@ -156,7 +159,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * @return  Returns which hours from the next 48 are relevant for the analysis. E.g. if it's 19pm and you want the data for 22pm-1am it will return an Array with 3 to 6
      */
-    fun getRelevantHours() : IntArray{
+    private fun getRelevantHours() : IntArray{
         //TODO: Make this dynamic
         //TODO: Consider that the start time might be on the next day
         val startHour = 21

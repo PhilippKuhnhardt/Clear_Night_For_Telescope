@@ -21,4 +21,6 @@
     <string name="standard_status">Fetching data, please be patient :)</string>
     <string name="channel_name">notification_channel</string>
     <string name="channel_description">Notification Channel</string>
+    <string name="good_weather_msg">Weather is good tonight</string>
+    <string name="bad_weather_msg">Weather is bad tonight</string>
 </resources>
