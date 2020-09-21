@@ -23,4 +23,5 @@
     <string name="channel_description">Notification Channel</string>
     <string name="good_weather_msg">Weather is good tonight</string>
     <string name="bad_weather_msg">Weather is bad tonight</string>
+    <string name="notification_title">Status Update</string>
 </resources>
